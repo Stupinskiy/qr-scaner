@@ -72,7 +72,9 @@
       })
       .catch(err => {
         fullNameSpan.textContent = '❌ Участник не найден';
-        joinDateSpan.textContent = '';
+        const dateParts = data.join_date.split("-");
+const formattedDate = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
+joinDateSpan.textContent = formattedDate;
         resultBox.style.display = 'block';
       });
   }
@@ -81,7 +83,7 @@
     { facingMode: { exact: "environment" } }, // 🚀 задняя камера
     {
       fps: 10,
-      qrbox: { width: 250, height: 250 },
+      qrbox: 250,
       aspectRatio: 1
     },
     onScanSuccess,
