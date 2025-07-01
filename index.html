@@ -79,30 +79,31 @@
 
   <!-- ✅ Внизу — JavaScript для логики -->
   <script>
-    const resultBox = document.getElementById('result');
-    const fullNameSpan = document.getElementById('fullName');
-    const joinDateSpan = document.getElementById('joinDate');
+  const resultBox = document.getElementById('result');
+  const fullNameSpan = document.getElementById('fullName');
+  const joinDateSpan = document.getElementById('joinDate');
+  const cameraSelect = document.getElementById('cameraSelect');
+  const html5QrCode = new Html5Qrcode("reader");
 
-    function onScanSuccess(decodedText) {
-      const url = `https://qr-id-system.onrender.com/lookup?id=${decodedText}`;
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          fullNameSpan.textContent = data.name;
-          joinDateSpan.textContent = data.join_date;
-          resultBox.style.display = 'block';
-        })
-        .catch(err => {
-          fullNameSpan.textContent = '❌ Участник не найден';
-          joinDateSpan.textContent = '';
-          resultBox.style.display = 'block';
-        });
-    }
+  function onScanSuccess(decodedText) {
+    const url = `https://qr-id-system.onrender.com/lookup?id=${decodedText}`;
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        fullNameSpan.textContent = data.name;
+        joinDateSpan.textContent = data.join_date;
+        resultBox.style.display = 'block';
+      })
+      .catch(err => {
+        fullNameSpan.textContent = '❌ Участник не найден';
+        joinDateSpan.textContent = '';
+        resultBox.style.display = 'block';
+      });
+  }
 
-    const html5QrCode = new Html5Qrcode("reader");
-
-    Html5Qrcode.getCameras().then(devices => {
-      const cameraSelect = document.getElementById("cameraSelect");
+  Html5Qrcode.getCameras().then(devices => {
+    if (devices && devices.length) {
+      // Заполняем выпадающий список камер
       devices.forEach((device, index) => {
         const option = document.createElement("option");
         option.value = device.id;
@@ -110,22 +111,40 @@
         cameraSelect.appendChild(option);
       });
 
-      // Автоматически запускаем первую
-      html5QrCode.start(devices[0].id, {
-        fps: 10,
-        qrbox: 250
-      }, onScanSuccess);
+      let backCamera = devices.find(d => d.label.toLowerCase().includes("back")) || devices[0];
+      cameraSelect.value = backCamera.id;
+
+      // Запуск с задней камеры
+      html5QrCode.start(
+        { deviceId: { exact: backCamera.id } },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0
+        },
+        onScanSuccess
+      );
 
       cameraSelect.addEventListener('change', () => {
         html5QrCode.stop().then(() => {
-          html5QrCode.start(cameraSelect.value, {
-            fps: 10,
-            qrbox: 250
-          }, onScanSuccess);
+          html5QrCode.start(
+            { deviceId: { exact: cameraSelect.value } },
+            {
+              fps: 10,
+              qrbox: { width: 250, height: 250 },
+              aspectRatio: 1.0
+            },
+            onScanSuccess
+          );
         });
       });
-    });
-  </script>
-
+    } else {
+      alert("Камера не найдена");
+    }
+  }).catch(err => {
+    console.error("Ошибка доступа к камере", err);
+    alert("Ошибка доступа к камере: " + err.message);
+  });
+</script>
 </body>
 </html>
