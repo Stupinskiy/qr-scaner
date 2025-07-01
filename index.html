@@ -61,23 +61,25 @@
   const joinDateSpan = document.getElementById('joinDate');
   const html5QrCode = new Html5Qrcode("reader");
 
-  function onScanSuccess(decodedText) {
-    const url = `https://qr-id-system.onrender.com/lookup?id=${decodedText}`;
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        fullNameSpan.textContent = data.name;
-        joinDateSpan.textContent = data.join_date;
-        resultBox.style.display = 'block';
-      })
-      .catch(err => {
-        fullNameSpan.textContent = '❌ Участник не найден';
-        const dateParts = data.join_date.split("-");
-const formattedDate = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
-joinDateSpan.textContent = formattedDate;
-        resultBox.style.display = 'block';
-      });
-  }
+function onScanSuccess(decodedText) {
+  const url = `https://qr-id-system.onrender.com/lookup?id=${decodedText}`;
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      fullNameSpan.textContent = data.name;
+
+      const dateParts = data.join_date.split("-");
+      const formattedDate = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
+      joinDateSpan.textContent = formattedDate;
+
+      resultBox.style.display = 'block';
+    })
+    .catch(err => {
+      fullNameSpan.textContent = '❌ Участник не найден';
+      joinDateSpan.textContent = '';
+      resultBox.style.display = 'block';
+    });
+}
 
   html5QrCode.start(
     { facingMode: { exact: "environment" } }, // 🚀 задняя камера
