@@ -18,11 +18,13 @@
     }
     #reader {
       width: 100%;
-      max-width: 320px;
+      max-width: 280px;
+      aspect-ratio: 1;
       margin: auto;
       border-radius: 10px;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      background: black;
     }
     #result {
       margin-top: 20px;
@@ -90,22 +92,28 @@
           cameraSelect.appendChild(option);
         });
 
-        const preferred = devices.find(d => d.label.toLowerCase().includes("back")) || devices[0];
+        // Приоритет задней камеры
+        const backCam = devices.find(d => d.label.toLowerCase().includes("back")) || devices[0];
+        cameraSelect.value = backCam.id;
 
-        html5QrCode.start(preferred.id, {
+        html5QrCode.start({ deviceId: { exact: backCam.id } }, {
           fps: 10,
-          qrbox: { width: 250, height: 250 }
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1
         }, onScanSuccess);
 
         cameraSelect.addEventListener('change', () => {
           html5QrCode.stop().then(() => {
-            html5QrCode.start(cameraSelect.value, {
+            html5QrCode.start({ deviceId: { exact: cameraSelect.value } }, {
               fps: 10,
-              qrbox: { width: 250, height: 250 }
+              qrbox: { width: 250, height: 250 },
+              aspectRatio: 1
             }, onScanSuccess);
           });
         });
       }
+    }).catch(err => {
+      alert("Не удается получить камеру: " + err);
     });
   </script>
 </body>
