@@ -2,39 +2,79 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Сканер QR-кода</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
+  <title>Сканер участника</title>
+
+  <!-- ✅ Сюда вставляем CSS -->
   <style>
-    body { font-family: sans-serif; padding: 20px; text-align: center; }
-    #reader { width: 300px; margin: auto; }
-    #result { margin-top: 20px; font-size: 18px; }
+    /* весь блок с оформлением из моего предыдущего ответа */
   </style>
+
+  <!-- 📦 Сюда можно подключить html5-qrcode -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
-  <h2>Сканер участника</h2>
-  <div id="reader"></div>
-  <div id="result">Ожидание сканирования...</div>
 
+  <!-- ✅ Сюда вставляем HTML-контент -->
+  <h1>📷 Сканер участника</h1>
+  <div id="reader"></div>
+  <div style="margin-top: 10px;">
+    <label for="cameraSelect">Выбор камеры: </label>
+    <select id="cameraSelect"></select>
+  </div>
+  <div id="result" class="result-box" style="display: none;">
+    <div class="name">✅ <span id="fullName"></span></div>
+    <div class="date">📅 Дата вступления: <strong id="joinDate"></strong></div>
+  </div>
+
+  <!-- ✅ Внизу — JavaScript для логики -->
   <script>
-    function onScanSuccess(decodedText, decodedResult) {
-      fetch(`https://qr-id-system.onrender.com/lookup?id=${decodedText}`)
+    const resultBox = document.getElementById('result');
+    const fullNameSpan = document.getElementById('fullName');
+    const joinDateSpan = document.getElementById('joinDate');
+
+    function onScanSuccess(decodedText) {
+      const url = `https://qr-id-system.onrender.com/lookup?id=${decodedText}`;
+      fetch(url)
         .then(res => res.json())
         .then(data => {
-          if (data.error) {
-            document.getElementById("result").innerHTML = "❌ Участник не найден";
-          } else {
-            document.getElementById("result").innerHTML = `
-              ✅ <strong>${data.name}</strong><br>
-              📅 Дата вступления: <strong>${data.join_date}</strong>
-            `;
-          }
+          fullNameSpan.textContent = data.name;
+          joinDateSpan.textContent = data.join_date;
+          resultBox.style.display = 'block';
         })
-        .catch(() => {
-          document.getElementById("result").innerText = "⚠️ Ошибка соединения с сервером";
+        .catch(err => {
+          fullNameSpan.textContent = '❌ Участник не найден';
+          joinDateSpan.textContent = '';
+          resultBox.style.display = 'block';
         });
     }
 
-    new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 }).render(onScanSuccess);
+    const html5QrCode = new Html5Qrcode("reader");
+
+    Html5Qrcode.getCameras().then(devices => {
+      const cameraSelect = document.getElementById("cameraSelect");
+      devices.forEach((device, index) => {
+        const option = document.createElement("option");
+        option.value = device.id;
+        option.text = device.label || `Камера ${index + 1}`;
+        cameraSelect.appendChild(option);
+      });
+
+      // Автоматически запускаем первую
+      html5QrCode.start(devices[0].id, {
+        fps: 10,
+        qrbox: 250
+      }, onScanSuccess);
+
+      cameraSelect.addEventListener('change', () => {
+        html5QrCode.stop().then(() => {
+          html5QrCode.start(cameraSelect.value, {
+            fps: 10,
+            qrbox: 250
+          }, onScanSuccess);
+        });
+      });
+    });
   </script>
+
 </body>
 </html>
