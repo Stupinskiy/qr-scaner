@@ -2,61 +2,66 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Сканер участника</title>
 
-  <!-- ✅ Сюда вставляем CSS -->
-  <style>
-    body {
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f9f9f9;
-  margin: 0;
-  padding: 20px;
-  text-align: center;
-}
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: system-ui, sans-serif;
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-h1 {
-  font-size: 1.6em;
-  margin-bottom: 20px;
-  color: #333;
-}
+  h2 {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 20px;
+  }
 
-#reader {
-  margin: auto;
-  max-width: 320px;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-}
+  #reader {
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    aspect-ratio: 1;
+    background: black;
+    margin: 20px auto;
+    box-shadow: 0 0 12px rgba(0,0,0,0.15);
+    border-radius: 12px;
+  }
 
-select {
-  margin-top: 15px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-}
+  #reader video {
+    width: 100% !important;
+    height: auto !important;
+    object-fit: cover;
+    border-radius: 12px;
+  }
 
-.result {
-  margin-top: 25px;
-  padding: 12px 20px;
-  background-color: #fff;
-  display: inline-block;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  font-size: 16px;
-}
+  #camera-select {
+    margin: 10px auto;
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 8px;
+  }
 
-.result p {
-  margin: 8px 0;
-  font-weight: 500;
-}
+  #result {
+    background: #fff;
+    padding: 15px;
+    margin: 10px auto;
+    border-radius: 10px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.1);
+    max-width: 320px;
+    text-align: left;
+  }
 
-.result .name {
-  color: #28a745;
-  font-weight: bold;
-  font-size: 18px;
-}
-  </style>
+  #result strong {
+    color: #006400;
+  }
+</style>
 
   <!-- 📦 Сюда можно подключить html5-qrcode -->
   <script src="https://unpkg.com/html5-qrcode"></script>
@@ -64,13 +69,10 @@ select {
 <body>
 
   <!-- ✅ Сюда вставляем HTML-контент -->
-  <h1>📷 Сканер участника</h1>
-
+  <h2>📷 Сканер участника</h2>
 <div id="reader"></div>
-
-<select id="cameraSelect"></select>
-
-<div class="result" id="scanResult">
+<select id="camera-select"></select>
+<div id="result"></div>
   <p class="name">✔ Иванов Иван</p>
   <p>📅 Дата вступления: <strong>01/09/2024</strong></p>
 </div>
