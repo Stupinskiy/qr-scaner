@@ -50,71 +50,49 @@
   <h2>📷 Сканер участника</h2>
   <div id="reader"></div>
 
-  <div>
-    <label for="cameraSelect">📷 Выбор камеры:</label>
-    <select id="cameraSelect"></select>
-  </div>
-
   <div id="result">
     <p>✅ <strong id="fullName"></strong></p>
     <p>📅 Дата вступления: <strong id="joinDate"></strong></p>
   </div>
 
   <script>
-    const resultBox = document.getElementById('result');
-    const fullNameSpan = document.getElementById('fullName');
-    const joinDateSpan = document.getElementById('joinDate');
-    const html5QrCode = new Html5Qrcode("reader");
-    const cameraSelect = document.getElementById("cameraSelect");
+  const resultBox = document.getElementById('result');
+  const fullNameSpan = document.getElementById('fullName');
+  const joinDateSpan = document.getElementById('joinDate');
+  const html5QrCode = new Html5Qrcode("reader");
 
-    function onScanSuccess(decodedText) {
-      const url = `https://qr-id-system.onrender.com/lookup?id=${decodedText}`;
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          fullNameSpan.textContent = data.name;
-          joinDateSpan.textContent = data.join_date;
-          resultBox.style.display = 'block';
-        })
-        .catch(err => {
-          fullNameSpan.textContent = '❌ Участник не найден';
-          joinDateSpan.textContent = '';
-          resultBox.style.display = 'block';
-        });
+  function onScanSuccess(decodedText) {
+    const url = `https://qr-id-system.onrender.com/lookup?id=${decodedText}`;
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        fullNameSpan.textContent = data.name;
+        joinDateSpan.textContent = data.join_date;
+        resultBox.style.display = 'block';
+      })
+      .catch(err => {
+        fullNameSpan.textContent = '❌ Участник не найден';
+        joinDateSpan.textContent = '';
+        resultBox.style.display = 'block';
+      });
+  }
+
+  html5QrCode.start(
+    { facingMode: { exact: "environment" } }, // 🚀 задняя камера
+    {
+      fps: 10,
+      qrbox: { width: 250, height: 250 },
+      aspectRatio: 1
+    },
+    onScanSuccess,
+    errorMessage => {
+      // можно скрыть или вывести отладку
+      console.warn("Ошибка сканирования", errorMessage);
     }
-
-    Html5Qrcode.getCameras().then(devices => {
-      if (devices && devices.length) {
-        devices.forEach((device, index) => {
-          const option = document.createElement("option");
-          option.value = device.id;
-          option.text = device.label || `Камера ${index + 1}`;
-          cameraSelect.appendChild(option);
-        });
-
-        // Приоритет задней камеры
-        const backCam = devices.find(d => d.label.toLowerCase().includes("back")) || devices[0];
-        cameraSelect.value = backCam.id;
-
-        html5QrCode.start({ deviceId: { exact: backCam.id } }, {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1
-        }, onScanSuccess);
-
-        cameraSelect.addEventListener('change', () => {
-          html5QrCode.stop().then(() => {
-            html5QrCode.start({ deviceId: { exact: cameraSelect.value } }, {
-              fps: 10,
-              qrbox: { width: 250, height: 250 },
-              aspectRatio: 1
-            }, onScanSuccess);
-          });
-        });
-      }
-    }).catch(err => {
-      alert("Не удается получить камеру: " + err);
-    });
-  </script>
+  ).catch(err => {
+    alert("⚠ Не удалось получить доступ к задней камере. Возможно, браузер не поддерживает или запрашивает разрешение.");
+    console.error(err);
+  });
+</script>
 </body>
 </html>
