@@ -100,6 +100,20 @@
 #statusIcon.error {
   color: #dc3545;
 }
+#statusIcon.status-neutral {
+  color: #888;
+}
+#result {
+  margin-top: 24px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  max-width: 340px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  text-align: left;
+}
 
     @media (max-width: 400px) {
       #manual-input input {
@@ -124,11 +138,11 @@
     <button onclick="handleManualInput()">Проверить</button>
   </div>
 
-<div id="result" style="display: none;">
+<div id="result">
   <p>
     <span class="status-icon">👤</span>
     <strong id="fullName">—</strong>
-    <span id="statusIcon" style="margin-left: 8px;">❔</span>
+    <span id="statusIcon" class="status-neutral" style="margin-left: 8px;">❔</span>
   </p>
   <p>
     <span class="status-icon">📅</span>
@@ -150,7 +164,6 @@
   const dateParts = data.join_date.split("-");
   const formattedDate = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
   joinDateSpan.textContent = formattedDate;
-  resultBox.style.display = 'block';
 }
 
 function showError() {
@@ -160,7 +173,6 @@ function showError() {
   const statusEl = document.getElementById("statusIcon");
   statusEl.textContent = '❌';
   statusEl.className = 'error';
-  resultBox.style.display = 'block';
 }
 
     function fetchParticipant(code) {
