@@ -5,61 +5,105 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Сканер участника</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      text-align: center;
+      font-family: 'Inter', sans-serif;
+      background: #f1f3f6;
       margin: 0;
       padding: 20px;
+      color: #1a1a1a;
     }
+
     h2 {
-      margin-bottom: 20px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      font-size: 22px;
+      text-align: center;
     }
+
     #reader {
       width: 100%;
-      max-width: 280px;
-      aspect-ratio: 1;
-      margin: auto;
-      border-radius: 10px;
+      max-width: 320px;
+      margin: 0 auto;
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      background: black;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      background: #000;
     }
+
     #manual-input {
-      margin-top: 20px;
+      text-align: center;
+      margin-top: 24px;
     }
-    input[type="text"] {
-      padding: 10px;
-      width: 200px;
+
+    #manual-input input {
+      padding: 12px 16px;
+      width: 220px;
       font-size: 16px;
-      border-radius: 8px;
+      border-radius: 10px;
       border: 1px solid #ccc;
+      margin-bottom: 12px;
+      outline: none;
+      transition: border-color 0.3s;
     }
-    button {
-      padding: 10px 16px;
-      margin-left: 10px;
+
+    #manual-input input:focus {
+      border-color: #007bff;
+    }
+
+    #manual-input button {
+      padding: 12px 20px;
       font-size: 16px;
+      font-weight: 600;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       background-color: #007bff;
       color: white;
       cursor: pointer;
+      transition: background-color 0.3s;
     }
-    button:hover {
+
+    #manual-input button:hover {
       background-color: #0056b3;
     }
+
     #result {
-      margin-top: 20px;
+      margin-top: 30px;
       background-color: #fff;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 15px;
-      display: none;
-      max-width: 320px;
+      border-radius: 14px;
+      padding: 20px;
+      max-width: 340px;
       margin-left: auto;
       margin-right: auto;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+      text-align: left;
+    }
+
+    #result p {
+      font-size: 16px;
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-icon {
+      font-size: 20px;
+    }
+
+    @media (max-width: 400px) {
+      #manual-input input {
+        width: 100%;
+      }
+
+      #manual-input button {
+        width: 100%;
+        margin-top: 8px;
+      }
     }
   </style>
 </head>
@@ -69,13 +113,14 @@
 
   <div id="manual-input">
     <p>Или введите код вручную:</p>
-    <input type="text" id="manualCode" placeholder="Введите код (например, D00001)" />
+    <input type="text" id="manualCode" placeholder="Например: D00001" />
+    <br />
     <button onclick="handleManualInput()">Проверить</button>
   </div>
 
   <div id="result">
-    <p>✅ <strong id="fullName"></strong></p>
-    <p>📅 Дата вступления: <strong id="joinDate"></strong></p>
+    <p><span class="status-icon">✅</span> <strong id="fullName">...</strong></p>
+    <p><span class="status-icon">📅</span> Дата вступления: <strong id="joinDate">...</strong></p>
   </div>
 
   <script>
@@ -122,7 +167,13 @@
       fetchParticipant(code);
     }
 
-    // Запуск сканера
+    // Автоматически запускать по Enter
+    document.getElementById("manualCode").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        handleManualInput();
+      }
+    });
+
     html5QrCode.start(
       { facingMode: { exact: "environment" } },
       { fps: 10, qrbox: 250, aspectRatio: 1 },
