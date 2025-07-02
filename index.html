@@ -92,7 +92,13 @@
     }
 
     .status-icon {
-      font-size: 20px;
+  font-size: 18px;
+}
+#error {
+  color: #dc3545;
+}
+#success {
+  color: #28a745;
     }
 
     @media (max-width: 400px) {
@@ -118,10 +124,17 @@
     <button onclick="handleManualInput()">Проверить</button>
   </div>
 
-  <div id="result">
-    <p><span class="status-icon">✅</span> <strong id="fullName">...</strong></p>
-    <p><span class="status-icon">📅</span> Дата вступления: <strong id="joinDate">...</strong></p>
-  </div>
+<div id="result" style="display: none;">
+  <p>
+    <span class="status-icon">👤</span>
+    <strong id="fullName">Имя</strong>
+    <span id="statusIcon" style="margin-left: 8px;"></span>
+  </p>
+  <p id="joinDateBlock" style="display: none;">
+    <span class="status-icon">📅</span>
+    Дата вступления: <strong id="joinDate"></strong>
+  </p>
+</div>
 
   <script>
     const resultBox = document.getElementById('result');
@@ -130,17 +143,23 @@
     const html5QrCode = new Html5Qrcode("reader");
 
     function showResult(data) {
-      fullNameSpan.textContent = data.name;
-      const dateParts = data.join_date.split("-");
-      const formattedDate = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
-      joinDateSpan.textContent = formattedDate;
-      resultBox.style.display = 'block';
-    }
+  fullNameSpan.textContent = data.name;
+  document.getElementById("statusIcon").innerHTML = '<span id="success">✅</span>';
 
-    function showError() {
-      fullNameSpan.textContent = '❌ Участник не найден';
-      joinDateSpan.textContent = '';
-      resultBox.style.display = 'block';
+  const dateParts = data.join_date.split("-");
+  const formattedDate = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
+  joinDateSpan.textContent = formattedDate;
+
+  document.getElementById("joinDateBlock").style.display = 'block';
+  resultBox.style.display = 'block';
+}
+
+function showError() {
+  fullNameSpan.textContent = 'Участник не найден';
+  document.getElementById("statusIcon").innerHTML = '<span id="error">❌</span>';
+  joinDateSpan.textContent = '';
+  document.getElementById("joinDateBlock").style.display = 'none';
+  resultBox.style.display = 'block';
     }
 
     function fetchParticipant(code) {
