@@ -91,15 +91,15 @@
       gap: 8px;
     }
 
-    .status-icon {
+.status-icon {
   font-size: 18px;
 }
-#error {
+#statusIcon.success {
+  color: #28a745;
+}
+#statusIcon.error {
   color: #dc3545;
 }
-#success {
-  color: #28a745;
-    }
 
     @media (max-width: 400px) {
       #manual-input input {
@@ -127,12 +127,12 @@
 <div id="result" style="display: none;">
   <p>
     <span class="status-icon">👤</span>
-    <strong id="fullName">Имя</strong>
-    <span id="statusIcon" style="margin-left: 8px;"></span>
+    <strong id="fullName">—</strong>
+    <span id="statusIcon" style="margin-left: 8px;">❔</span>
   </p>
-  <p id="joinDateBlock" style="display: none;">
+  <p>
     <span class="status-icon">📅</span>
-    Дата вступления: <strong id="joinDate"></strong>
+    Дата вступления: <strong id="joinDate">—</strong>
   </p>
 </div>
 
@@ -144,23 +144,24 @@
 
     function showResult(data) {
   fullNameSpan.textContent = data.name;
-  document.getElementById("statusIcon").innerHTML = '<span id="success">✅</span>';
+  document.getElementById("statusIcon").textContent = '✅';
+  document.getElementById("statusIcon").className = 'success';
 
   const dateParts = data.join_date.split("-");
   const formattedDate = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
   joinDateSpan.textContent = formattedDate;
-
-  document.getElementById("joinDateBlock").style.display = 'block';
   resultBox.style.display = 'block';
 }
 
 function showError() {
   fullNameSpan.textContent = 'Участник не найден';
-  document.getElementById("statusIcon").innerHTML = '<span id="error">❌</span>';
-  joinDateSpan.textContent = '';
-  document.getElementById("joinDateBlock").style.display = 'none';
+  joinDateSpan.textContent = '—';
+
+  const statusEl = document.getElementById("statusIcon");
+  statusEl.textContent = '❌';
+  statusEl.className = 'error';
   resultBox.style.display = 'block';
-    }
+}
 
     function fetchParticipant(code) {
       const url = `https://qr-id-system.onrender.com/lookup?id=${code}`;
