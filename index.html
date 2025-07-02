@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Сканер участника</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
@@ -26,6 +26,29 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       background: black;
     }
+    #manual-input {
+      margin-top: 20px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 200px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px 16px;
+      margin-left: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
     #result {
       margin-top: 20px;
       background-color: #fff;
@@ -38,17 +61,17 @@
       margin-right: auto;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
-    select {
-      padding: 8px 14px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-top: 12px;
-    }
   </style>
 </head>
 <body>
   <h2>📷 Сканер участника</h2>
   <div id="reader"></div>
+
+  <div id="manual-input">
+    <p>Или введите код вручную:</p>
+    <input type="text" id="manualCode" placeholder="Введите код (например, D00001)" />
+    <button onclick="handleManualInput()">Проверить</button>
+  </div>
 
   <div id="result">
     <p>✅ <strong id="fullName"></strong></p>
@@ -56,47 +79,59 @@
   </div>
 
   <script>
-  const resultBox = document.getElementById('result');
-  const fullNameSpan = document.getElementById('fullName');
-  const joinDateSpan = document.getElementById('joinDate');
-  const html5QrCode = new Html5Qrcode("reader");
+    const resultBox = document.getElementById('result');
+    const fullNameSpan = document.getElementById('fullName');
+    const joinDateSpan = document.getElementById('joinDate');
+    const html5QrCode = new Html5Qrcode("reader");
 
-function onScanSuccess(decodedText) {
-  const url = `https://qr-id-system.onrender.com/lookup?id=${decodedText}`;
-  fetch(url)
-    .then(res => res.json())
-    .then(data => {
+    function showResult(data) {
       fullNameSpan.textContent = data.name;
-
       const dateParts = data.join_date.split("-");
       const formattedDate = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
       joinDateSpan.textContent = formattedDate;
-
       resultBox.style.display = 'block';
-    })
-    .catch(err => {
+    }
+
+    function showError() {
       fullNameSpan.textContent = '❌ Участник не найден';
       joinDateSpan.textContent = '';
       resultBox.style.display = 'block';
-    });
-}
-
-  html5QrCode.start(
-    { facingMode: { exact: "environment" } }, // 🚀 задняя камера
-    {
-      fps: 10,
-      qrbox: 250,
-      aspectRatio: 1
-    },
-    onScanSuccess,
-    errorMessage => {
-      // можно скрыть или вывести отладку
-      console.warn("Ошибка сканирования", errorMessage);
     }
-  ).catch(err => {
-    alert("⚠ Не удалось получить доступ к задней камере. Возможно, браузер не поддерживает или запрашивает разрешение.");
-    console.error(err);
-  });
-</script>
+
+    function fetchParticipant(code) {
+      const url = `https://qr-id-system.onrender.com/lookup?id=${code}`;
+      fetch(url)
+        .then(res => {
+          if (!res.ok) throw new Error("Не найден");
+          return res.json();
+        })
+        .then(showResult)
+        .catch(showError);
+    }
+
+    function onScanSuccess(decodedText) {
+      fetchParticipant(decodedText);
+    }
+
+    function handleManualInput() {
+      const code = document.getElementById("manualCode").value.trim().toUpperCase();
+      if (code.length === 0) {
+        alert("Введите код участника.");
+        return;
+      }
+      fetchParticipant(code);
+    }
+
+    // Запуск сканера
+    html5QrCode.start(
+      { facingMode: { exact: "environment" } },
+      { fps: 10, qrbox: 250, aspectRatio: 1 },
+      onScanSuccess,
+      errorMessage => console.warn("Ошибка сканирования", errorMessage)
+    ).catch(err => {
+      alert("⚠ Не удалось получить доступ к камере. Используйте ручной ввод.");
+      console.error(err);
+    });
+  </script>
 </body>
 </html>
